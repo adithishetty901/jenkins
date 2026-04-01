@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simple CI/CD App</title>
+    <title>Submit Name</title>
 </head>
 <body>
-    <h2>Enter your name</h2>
-    <form method="POST">
-        <input type="text" name="name" required>
-        <button type="submit">Submit</button>
-    </form>
 
-    <h3>{{ message }}</h3>
+<h2>Enter Name</h2>
+
+<form id="form">
+    <input type="text" id="name" placeholder="Enter your name" required>
+    <button type="submit">Submit</button>
+</form>
+
+<p id="response"></p>
+
+<script>
+document.getElementById("form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+
+    try {
+        const res = await fetch("/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name: name })
+        });
+
+        const data = await res.json();
+        document.getElementById("response").innerText = data.message;
+
+    } catch (error) {
+        document.getElementById("response").innerText = "Error connecting to server";
+    }
+});
+</script>
+
 </body>
 </html>

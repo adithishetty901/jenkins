@@ -1,36 +1,34 @@
-from flask import Flask, render_template, request
+from flask import Flask, request, jsonify, render_template
 import mysql.connector
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="demo_user",
-        password="password",
-        database="demo_db"
-    )
+# MySQL connection
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="Adit@1234",   # 🔴 change this
+    database="testdb"
+)
 
-@app.route('/', methods=['GET', 'POST'])
+# Route to load frontend
+@app.route('/')
 def home():
-    message = ""
+    return render_template('index.html')
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+# API to store name
+@app.route('/add', methods=['POST'])
+def add_name():
+    data = request.get_json()
+    name = data.get('name')
 
-    if request.method == 'POST':
-        name = request.form.get('name')
-        cursor.execute("INSERT INTO users (name) VALUES (%s)", (name,))
-        conn.commit()
-        message = f"Hello, {name} 👋"
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO users (name) VALUES (%s)", (name,))
+    db.commit()
 
-    cursor.execute("SELECT name FROM users")
-    users = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return render_template('index.html', message=message, users=users)
+    return jsonify({"message": f"{name} stored successfully!"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
